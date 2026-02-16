@@ -8,7 +8,7 @@
 
 namespace http{
 
-//解析HttpRequest
+//解析HttpRequest内容并填入对象
 class HttpContext 
 {
 public:
