@@ -28,6 +28,7 @@ public:
     bool gotAll() const 
     { return state_m == kGotAll;  }
 
+    //开启新一轮的解析，一般是gotAll返回true之后，处理完前一个请求，就调用这个请求
     void reset()
     {
         state_m = kExpectRequestLine;
