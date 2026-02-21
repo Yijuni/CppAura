@@ -1,4 +1,4 @@
-#include "DbConnection.h"
+#include "db/DbConnection.h"
 namespace http 
 {
 namespace db 
@@ -15,7 +15,9 @@ http::db::DbConnection::DbConnection(const std::string &host, const std::string 
             conn_m->setSchema(database_m);
             
             //启动自动重连,当连接因网络波动断开时，下次操作自动尝试重连。
-            conn_m->setClientOption("OPT_RECONNECT","true");
+            //最好删除不然一直警报，重连应该自己控制
+            // conn_m->setClientOption("OPT_RECONNECT","false");
+
             //设置连接超时，避免数据库没响应导致程序卡死
             conn_m->setClientOption("OPT_CONNECT_TIMEOUT","10");
             //禁止多语句执行
@@ -49,9 +51,10 @@ bool http::db::DbConnection::isValid()
     try
     {
         if(!conn_m) return false;
+        std::unique_lock<std::mutex> lock(mutex_m);
         std::unique_ptr<sql::Statement> stmt(conn_m->createStatement());
-        stmt->execute("SELECT 1");
-        return true;
+        std::unique_ptr<sql::ResultSet> rs(stmt->executeQuery("SELECT 1"));
+        return (rs && rs->next());
     }
     catch(const std::exception& e)
     {
@@ -62,6 +65,7 @@ bool http::db::DbConnection::isValid()
 
 void http::db::DbConnection::reconnect()
 {
+    std::unique_lock<std::mutex> lock(mutex_m);
     try{
         if(conn_m){
             conn_m->reconnect();
@@ -107,10 +111,11 @@ bool DbConnection::ping()
         if(!conn_m){
             return false;
         }
-        //创建Statement复用
+        // 使用锁防止与其它操作并发使用同一连接
+        std::unique_lock<std::mutex> lock(mutex_m);
         std::unique_ptr<sql::Statement> stmt(conn_m->createStatement());
-        stmt->execute("SELECT 1");
-        return true;
+        std::unique_ptr<sql::ResultSet> rs(stmt->executeQuery("SELECT 1"));
+        return (rs && rs->next());
     }catch(const sql::SQLException& e){
         LOG_ERROR<<"Ping failed: "<<e.what();
         return false;

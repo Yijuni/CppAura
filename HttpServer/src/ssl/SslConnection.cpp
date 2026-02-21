@@ -184,6 +184,10 @@ long SslConnection::bioCtrl(BIO* bio, int cmd, long num, void* ptr)
 
 void SslConnection::handleHandshake()
 {
+    // SSL_do_handshake 会从你写入的 
+    // read-BIO 读数据并把要发送的数据写到 write-BIO
+    // 然后返回 SSL_ERROR_WANT_WRITE，这样继续给客户端发送
+    // 我想要发送的握手数据
     int ret = SSL_do_handshake(ssl_m);
     
     if (ret == 1) {
@@ -203,7 +207,7 @@ void SslConnection::handleHandshake()
     switch (err) {
         // 等待更多网络数据，正常
         case SSL_ERROR_WANT_READ:
-        case SSL_ERROR_WANT_WRITE:
+        case SSL_ERROR_WANT_WRITE:{
             // 正常的握手过程，需要继续
             // 关键：OpenSSL 有数据要发送！可能服务器主动协商重发
             char outBuf[4096];
@@ -212,7 +216,7 @@ void SslConnection::handleHandshake()
                 conn_m->send(outBuf, n); // 发送到网络
             }
             break;
-            
+        }
         default: {
             // 获取详细的错误信息
             char errBuf[256];

@@ -1,4 +1,4 @@
-#include "DbConnectionPool.h"
+#include "db/DbConnectionPool.h"
 
 namespace http
 {
@@ -63,6 +63,12 @@ std::shared_ptr<DbConnection> http::db::DbConnectionPool::getConnection()
         //返回的智能指针引用计数是1，因为引用计数控制块不是用的同一个
         return std::shared_ptr<DbConnection>(conn.get(),
         [this,conn](DbConnection*){
+            try{
+                // 在归还连接池前尽量清理连接状态
+                conn->cleanup();
+            }catch(...){
+                // 忽略清理过程中可能的错误，后续重连逻辑会处理不可恢复的连接
+            }
             std::unique_lock<std::mutex> lock(this->mutex_m);
             //放回连接池
             connections_m.push(std::move(conn));

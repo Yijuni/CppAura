@@ -24,7 +24,8 @@ public:
 
     HttpResponse(bool close = true)
         : statusCode_m(kUnknown)
-        , closeConnection_m(close)
+        , closeConnection_m(close),
+        httpVersion_m("HTTP/1.0")
     {}
 
     void setVersion(std::string version)
@@ -56,6 +57,7 @@ public:
     void setBody(const std::string& body)
     { 
         body_m = body;
+        setContentLength(body_m.size());
     }
 
     void setStatusLine(const std::string& version,

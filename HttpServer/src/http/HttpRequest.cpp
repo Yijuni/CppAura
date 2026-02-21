@@ -1,5 +1,5 @@
-#include "../../include/http/HttpRequest.h"
-#include "HttpRequest.h"
+#include "http/HttpRequest.h"
+#include <cctype>
 namespace http
 {
     
@@ -101,11 +101,14 @@ std::string http::HttpRequest::getQueryParameters(const std::string &key) const
 void http::HttpRequest::addHeader(const char *start, const char *colon, const char *end)
 {
     std::string key(start,colon);
-    while(colon<end && isspace(*colon)){
-        ++colon;
+    // colon 指向 ':'，跳过 ':' 以及后续的任意空白，得到值的起始位置
+    const char* valStart = colon;
+    if (valStart < end && *valStart == ':') ++valStart;
+    while(valStart<end && isspace(static_cast<unsigned char>(*valStart))){
+        ++valStart;
     }
-    std::string value(colon,end);
-    while(!value.empty() && isspace(value[value.size()-1])){
+    std::string value(valStart,end);
+    while(!value.empty() && isspace(static_cast<unsigned char>(value[value.size()-1]))){
         value.resize(value.size()-1);
     }
     headers_m[key] = value;

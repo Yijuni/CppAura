@@ -1,10 +1,11 @@
-#include "HttpContext.h"
+#include "http/HttpContext.h"
 
 namespace http{
 //将HTTP报文解析出来封装到HttpRequest对象里面
 bool http::HttpContext::parseRequest(muduo::net::Buffer *buf, muduo::Timestamp receiveTime)
 {
-    bool ok = true; //解析每行请求格式是否正确,格式不正确
+    //解析每行请求格式是否正确,格式不正确才返回false
+    bool ok = true; 
     bool hasMore = true;
     while(hasMore){
         if(state_m==kExpectRequestLine){//解析请求行 状态1
@@ -58,7 +59,7 @@ bool http::HttpContext::parseRequest(muduo::net::Buffer *buf, muduo::Timestamp r
             }else{ //数据不完整，等待下一次回调
                 hasMore = false;
             }
-        }else{ //解析请求体，状态3
+        }else if(state_m == kExpectBody){ //解析请求体，状态3
             //检查缓冲区是否有足够数据,可读数据<请求体长度:数据不完整
             if(buf->readableBytes()<request_m.contentLength()){
                 hasMore = false;

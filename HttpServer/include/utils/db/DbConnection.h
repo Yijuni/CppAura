@@ -35,7 +35,7 @@ public:
     template<typename... Args>
     sql::ResultSet* executeQuery(const std::string& sql, Args&&... args)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_m);
         try 
         {
             // 直接创建新的预处理语句，不使用缓存
@@ -57,7 +57,7 @@ public:
     template<typename... Args>
     int executeUpdate(const std::string& sql, Args&&... args)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_m);
         try 
         {
             // 直接创建新的预处理语句，不使用缓存
