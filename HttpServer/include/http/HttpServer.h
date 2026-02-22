@@ -64,8 +64,8 @@ public:
         router_m.registerCallback(HttpRequest::kGet,path,cb);
     }
     //注册Get静态路由处理器（对象回调)
-    void Get(const std::string& path,router::Router::HandlerPtr cb){
-        router_m.registerHandler(HttpRequest::kGet,path,cb);
+    void Get(const std::string& path,router::Router::HandlerPtr handler){
+        router_m.registerHandler(HttpRequest::kGet,path,handler);
     }
     //注册Post静态路由处理器（回调函数）
     void Post(const std::string& path, const HttpCallback& cb)
