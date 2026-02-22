@@ -1,5 +1,5 @@
- #pragma once
- #include "db/DbConnectionPool.h"
+#pragma once
+#include "db/DbConnectionPool.h"
  
 #include <string>
 
@@ -13,6 +13,7 @@ public:
                     const std::string& password, const std::string& database,
                     size_t poolSize = 10)
     {
+        LOG_WARN<<"MysqlUtil initialize start  ! ";
         http::db::DbConnectionPool::getInstance().init(
             host, user, password, database, poolSize);
     }
