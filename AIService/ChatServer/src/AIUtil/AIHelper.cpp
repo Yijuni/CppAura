@@ -25,6 +25,10 @@ void AIHelper::addMessage(int userId, const std::string &userName, bool is_user,
     //消息队列异步入库(持久化)
     pushMessageToMysql(userId,userName,is_user,userInput,ms,sessionId);
 }
+void AIHelper::restorMessage(const std::string &userInput, long long ms)
+{
+    messages.push_back({userInput,ms});
+}
 /**
  * 整体流程
  * 判断是否需要MCP ：不需要直接构建请求发送给模型获取结果
@@ -35,7 +39,7 @@ void AIHelper::addMessage(int userId, const std::string &userName, bool is_user,
  *      4. 根据结果再次构造请求消息，同时包含之前对话上下文，发送给大模型
  *      5. 获取最终结果，返回给客户端
  */
-//可以动态选择请求的模型类型
+// 可以动态选择请求的模型类型
 std::string AIHelper::chat(int userId, std::string userName, std::string sessionId, std::string userQuestion, std::string modelType)
 {
     //设置模型策略.每次会话可以选择不同的模型来提问
@@ -66,6 +70,7 @@ std::string AIHelper::chat(int userId, std::string userName, std::string session
 
     //支持MCP,先尝试使用工具调用
     AIConfig config;
+    //todo:硬编码需要改掉
     config.loadFromFile("../../resource/tools/config.json");
     std::string tempUserQuestion = config.buildPrompt(userQuestion);
     std::cout << "tempUserQuestion is " << tempUserQuestion << std::endl;
@@ -147,7 +152,7 @@ json AIHelper::request(const json &payload)
     return executeCurl(payload);
 }
 
-//获取内存所有对话信息
+//获取内存所有对话信息，前端可能会手动选择获取所有消息
 std::vector<std::pair<std::string, long long>> AIHelper::GetMessages()
 {
     return this->messages;

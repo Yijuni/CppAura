@@ -36,6 +36,7 @@ public:
     void addMessage(int userId, const std::string& userName, bool is_user, 
         const std::string& userInput, std::string sessionId);
 
+    //这里就是服务器启动时重新加载数据到内存
     void restorMessage(const std::string& userInput, long long ms);
     
     // 发送聊天消息，返回AI的响应内容
