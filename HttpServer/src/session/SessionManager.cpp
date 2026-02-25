@@ -45,7 +45,7 @@ std::shared_ptr<Session> http::session::SessionManager::getSession(const HttpReq
 void http::session::SessionManager::destroySession(const std::string &sessionId)
 {
     storage_m->remove(sessionId);
-
+    
 }
 
 //不同的存储方式，清理过期session方式不同

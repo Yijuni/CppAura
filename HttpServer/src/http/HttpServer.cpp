@@ -109,18 +109,6 @@ namespace http
         const std::string connection = request.getHeader("Connection");
         bool close = ((connection=="close") || (request.getVersion()=="HTTP/1.0" && connection!="Keep-Alive"));
         HttpResponse response(close);
-        response.setVersion(request.getVersion());
-
-        // 根据连接类型和请求版本设置 Connection 头
-        if (close) {
-            response.addHeader("Connection", "close");
-        } else {
-            if (request.getVersion() == "HTTP/1.0") {
-                response.addHeader("Connection", "Keep-Alive");
-            } else {
-                response.addHeader("Connection", "keep-alive");
-            }
-        }
 
         //执行真正处理请求逻辑的函数
         httpCallBack_m(request,&response);
