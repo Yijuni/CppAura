@@ -20,7 +20,7 @@ include_directories(
     ${CURL_INCLUDE_DIRS}
 )
 message(STATUS "OpenCV include dirs: ${OpenCV_INCLUDE_DIRS}")
-message(STATUS "OpenCV libs: ${OpenCV_LIBS}")
+
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/include
@@ -43,27 +43,26 @@ find_library(MYSQLCPPCONN_LIBRARY
     PATHS /usr/lib /usr/lib64 /usr/local/lib
 )
 
-find_library(ONNXRUNTIME_LIBRARY
-    NAMES onnxruntime
-    PATHS /usr/lib /usr/lib64 /usr/local/lib
-)
-
 # 添加所有源文件
 file(GLOB_RECURSE HTTP_SERVER_SRC
     "${PROJECT_SOURCE_DIR}/HttpServer/src/*.cpp"
+)
+
+file(GLOB_RECURSE GOMOKU_SERVER_SRC
+    "${PROJECT_SOURCE_DIR}/AIService/ChatServer/src/*.cpp"
 )
 
 # 主程序文件
 set(MAIN_SRC "${PROJECT_SOURCE_DIR}/AIService/ChatServer/src/main.cpp")
 
 # 添加可执行文件
-add_executable(http_server
+add_executable(my_http_server
     ${MAIN_SRC}
     ${HTTP_SERVER_SRC}
     ${GOMOKU_SERVER_SRC}
 )
 # 链接库
-target_link_libraries(http_server
+target_link_libraries(my_http_server
     pthread
     muduo_net
     muduo_base
@@ -72,7 +71,7 @@ target_link_libraries(http_server
     ssl
     crypto
     ${CURL_LIBRARIES}
-    ${OpenCV_LIBS}
+    ${OpenCV4_LIBRARIES}
     /usr/lib/x86_64-linux-gnu/libopencv_core.so
     /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so
     /usr/lib/x86_64-linux-gnu/libopencv_highgui.so
@@ -80,7 +79,7 @@ target_link_libraries(http_server
     /usr/lib/x86_64-linux-gnu/libopencv_videoio.so
     /usr/lib/x86_64-linux-gnu/libopencv_dnn.so
 
-    ${ONNXRUNTIME_LIBRARY}        # 自动查找的 ONNX Runtime 库
+    ${PROJECT_SOURCE_DIR}/../onnxruntime-linux-x64-1.20.0/lib/libonnxruntime.so      # 自动查找的 ONNX Runtime 库
 
     SimpleAmqpClient
     rabbitmq
@@ -96,7 +95,6 @@ foreach(dir ${dirs})
     message(STATUS "  ${dir}")
 endforeach()
 
-message(STATUS "ONNX Runtime library: ${ONNXRUNTIME_LIBRARY}")
 message(STATUS "Main source file: ${MAIN_SRC}")
 message(STATUS "HTTP Server sources: ${HTTP_SERVER_SRC}")
 message(STATUS "Gomoku Server sources: ${GOMOKU_SERVER_SRC}")
