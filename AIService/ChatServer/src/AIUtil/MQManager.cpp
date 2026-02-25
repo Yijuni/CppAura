@@ -22,7 +22,7 @@ void MQManager::publish(const std::string &queue, const std::string &msg)
 }
 
 MQManager::MQManager(size_t poolSize, const std::string &host)
-    : pool_(poolSize), counter_(0), rabbitmq_host_(host)
+    : counter_(0), rabbitmq_host_(host),poolSize_(poolSize)
 {
     for (int i = 0; i < poolSize_; i++)
     {

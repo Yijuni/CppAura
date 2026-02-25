@@ -1,4 +1,4 @@
-#pragma noce
+#pragma once
 
 #include <atomic>
 #include <memory>

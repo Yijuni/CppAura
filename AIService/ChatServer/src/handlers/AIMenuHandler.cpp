@@ -25,7 +25,7 @@ void AIMenuHandler::handle(const http::HttpRequest& req, http::HttpResponse* res
         int userId = std::stoi(session->getValue("userId"));
         std::string username = session->getValue("username");
 
-        std::string reqFile("../AIApps/ChatServer/resource/menu.html");
+        std::string reqFile("../AIService/ChatServer/resource/menu.html");
         FileUtil fileOperater(reqFile);
         if (!fileOperater.isValid())
         {

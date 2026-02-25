@@ -97,6 +97,7 @@ public:
 
 private:
     std::string apiKey_;
+    std::string sessionid_; //阿里智能体实现多轮对话用的（1小时有效）
 };
 
 class AliyunMcpStrategy : public AIStrategy {

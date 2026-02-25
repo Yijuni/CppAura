@@ -3,7 +3,7 @@
 void ChatEntryHandler::handle(const http::HttpRequest &req, http::HttpResponse *resp)
 {
     std::string reqFile;
-    reqFile.append("../AIApps/ChatServer/resource/entry.html");
+    reqFile.append("../AIService/ChatServer/resource/entry.html");
     FileUtil fileOperater(reqFile);
     if (!fileOperater.isValid())
     {

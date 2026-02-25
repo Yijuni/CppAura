@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
             break;
         }
     }
-    muduo::Logger::setLogLevel(muduo::Logger::WARN);
+    muduo::Logger::setLogLevel(muduo::Logger::DEBUG);
     ChatServer server(port, serverName);
     server.setThreadNum(4);
     

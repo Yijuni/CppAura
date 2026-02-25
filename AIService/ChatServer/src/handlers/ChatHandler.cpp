@@ -26,7 +26,7 @@ void ChatHandler::handle(const http::HttpRequest& req, http::HttpResponse* resp)
         std::string username = session->getValue("username");
 
         //读取AI页面返回
-        std::string reqFile("../AIApps/ChatServer/resource/AI.html");
+        std::string reqFile("../AIService/ChatServer/resource/AI.html");
         FileUtil fileOperater(reqFile);
         //验证文件是否存在
         if (!fileOperater.isValid())

@@ -24,7 +24,7 @@ void AIUploadHandler::handle(const http::HttpRequest& req, http::HttpResponse* r
         int userId = std::stoi(session->getValue("userId"));
         std::string username = session->getValue("username");
 
-        std::string reqFile("../AIApps/ChatServer/resource/upload.html");
+        std::string reqFile("../AIService/ChatServer/resource/upload.html");
         FileUtil fileOperater(reqFile);
         if (!fileOperater.isValid())
         {

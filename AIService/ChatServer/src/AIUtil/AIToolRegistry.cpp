@@ -60,6 +60,7 @@ json AIToolRegistry::getWeather(const json &args)
 
     std::string url  = "https://wttr.in/" + encodedCity + "?format=3&lang=zh";
 
+    std::cout<<"City weather url:"<< url<<std::endl;
     CURL* curl = curl_easy_init();
     std::string response;
 
@@ -74,7 +75,7 @@ json AIToolRegistry::getWeather(const json &args)
     //传递给回调函数的上下文（这里是 response 字符串地址）
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
     // 防止卡死，5 秒超时
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 50L);
     // 	自动跟随 301/302 重定向（wttr.in 有时会跳转）
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
@@ -84,7 +85,8 @@ json AIToolRegistry::getWeather(const json &args)
     curl_easy_cleanup(curl);
 
     if (res != CURLE_OK) {
-        return json{ {"error", "CURL request failed"} };
+        std::string errorMsg = "CURL error: " + std::string(curl_easy_strerror(res));
+        return json{{"error", errorMsg}};
     }
 
     

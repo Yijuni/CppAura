@@ -14,6 +14,7 @@ void AIHelper::setStrategy(std::shared_ptr<AIStrategy> strat)
 
 void AIHelper::addMessage(int userId, const std::string &userName, bool is_user, const std::string &userInput, std::string sessionId)
 {
+    LOG_WARN<<"添加新的消息到数据库 userid"<<userId<<" username: "<<userName<<" userinput:"<<userInput;
     auto now = std::chrono::system_clock::now();
     // time_since_epoch() 返回从 UNIX 纪元（1970-01-01 00:00:00 UTC） 到当前时间点的持续时间（duration）
     auto duration = now.time_since_epoch();
@@ -44,9 +45,10 @@ std::string AIHelper::chat(int userId, std::string userName, std::string session
 {
     //设置模型策略.每次会话可以选择不同的模型来提问
     setStrategy(StrategyFactory::instance().create(modelType));
-
+    std::cout<<"模型类别："<<modelType<<std::endl;
     //不支持MCP
     if(!strategy->isMCPModel){
+        LOG_DEBUG<<"不使用MCP工具";
         //添加
         addMessage(userId,userName,true,userQuestion,sessionId);
         //构建请求消息
@@ -55,25 +57,28 @@ std::string AIHelper::chat(int userId, std::string userName, std::string session
         //执行请求
         json response = executeCurl(payload);
         //解析返回消息
+        
         std::string answer = strategy->parseResponse(response);
 
+        LOG_DEBUG<<"模型回答:"<<answer;
         //添加消息都按本地存储
         addMessage(userId,userName,false,answer,sessionId);
 
         if(answer.empty()){
             LOG_ERROR<<"无法解析模型响应";
-            return "[Error] 无法解析模型相应";
+            return "[Error] 无法解析模型响应";
         }else{
             return answer;
         }
     }
 
+    LOG_DEBUG<<"使用MCP工具";
     //支持MCP,先尝试使用工具调用
     AIConfig config;
     //todo:硬编码需要改掉
-    config.loadFromFile("../../resource/tools/config.json");
+    config.loadFromFile("../AIService/ChatServer/resource/tools/config.json");
     std::string tempUserQuestion = config.buildPrompt(userQuestion);
-    std::cout << "tempUserQuestion is " << tempUserQuestion << std::endl;
+    LOG_DEBUG << "工具调用第一轮提示词 " << tempUserQuestion;
 
     //这里没有放入数据库，这是放入内存中
     messages.push_back({tempUserQuestion,0});
@@ -89,7 +94,7 @@ std::string AIHelper::chat(int userId, std::string userName, std::string session
     // 因为这次发送给模型是服务器自身发送的，不属于用户消息
     messages.pop_back();
 
-    std::cout << "aiResult is " << aiResult << std::endl;
+    LOG_DEBUG << "工具调用AI回复json: " << aiResult;
     //解析这次工具调用的响应（是否需要工具调用)
     AIToolCall call = config.parseAIResponse(aiResult);
 
@@ -100,7 +105,7 @@ std::string AIHelper::chat(int userId, std::string userName, std::string session
         //模型回复放进去
         addMessage(userId,userName,false,aiResult,sessionId);
 
-        std::cout<<"不使用工具"<<std::endl;
+        LOG_DEBUG<<"不使用MCP工具";
         return aiResult;
     }
 
@@ -125,7 +130,7 @@ std::string AIHelper::chat(int userId, std::string userName, std::string session
     //再次构建结果分析promopt
     std::string secondPrompt = config.buildToolResultPrompt(userQuestion,call.name,call.args,toolJson);
 
-    std::cout << "secondPrompt is " << secondPrompt << std::endl;
+    LOG_DEBUG << "工具调用第二轮提示词"<<secondPrompt;
     //再次放入内存，上下文要一块发给大模型
     messages.push_back({ secondPrompt, 0 });
 
@@ -138,7 +143,7 @@ std::string AIHelper::chat(int userId, std::string userName, std::string session
     //删除提示词（Server发送的)
     messages.pop_back();
 
-    std::cout << "finalAnswer is " << finalAnswer << std::endl;
+    LOG_DEBUG << "模型最终回答 " << finalAnswer;
 
     // 保存数据库
     addMessage(userId,userName,true,userQuestion,sessionId);
@@ -200,7 +205,7 @@ json AIHelper::executeCurl(const json &payload)
         throw std::runtime_error("Failed to initialize curl");
     }
 
-    std::cout<<"test "<< strategy->getApiUrl().c_str()<<' '<< strategy->getApiKey()<<std::endl;
+    std::cout<<"curl请求: "<< strategy->getApiUrl().c_str()<<' '<< strategy->getApiKey()<<std::endl;
 
     std::string readBuffer;
     struct curl_slist* headers = nullptr;
@@ -214,6 +219,7 @@ json AIHelper::executeCurl(const json &payload)
     
     std::string payloadStr = payload.dump();
 
+    // 这里是请求的链接地址
     curl_easy_setopt(curl, CURLOPT_URL, strategy->getApiUrl().c_str());
     // 附加自定义请求头（认证 + JSON 类型）
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -232,6 +238,7 @@ json AIHelper::executeCurl(const json &payload)
         throw std::runtime_error("curl_easy_perform() failed: " + std::string(curl_easy_strerror(res)));
     }
     try {
+        LOG_INFO<<"模型原始回复"<<readBuffer;
         return json::parse(readBuffer);
     }
     catch (...) {

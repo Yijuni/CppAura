@@ -49,7 +49,6 @@ void ChatSendHandler::handle(const http::HttpRequest& req, http::HttpResponse* r
 
             //找到对应的会话信息，如果不存在那就新加一个
             if (userSessions.find(sessionId) == userSessions.end()) {
-
                 userSessions.emplace( 
                     sessionId,
                     std::make_shared<AIHelper>()

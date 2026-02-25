@@ -58,7 +58,7 @@ std::string DouBaoStrategy::getApiKey()const {
 }
 
 std::string DouBaoStrategy::getModel() const {
-    return "doubao-seed-1-6-thinking-250715";
+    return "doubao-seed-2-0-pro-260215";
 }
 
 json DouBaoStrategy::buildRequest(const std::vector<std::pair<std::string, long long>>& messages) const {
@@ -107,17 +107,26 @@ std::string AliyunRAGStrategy::getModel() const {
 }
 
 
+//阿里百炼的智能体请求和其他的有些不同需要参考官方文档，具体来说，智能体历史对话只传用户的
 json AliyunRAGStrategy::buildRequest(const std::vector<std::pair<std::string, long long>>& messages) const {
     json payload;
     json msgArray = json::array();
-    for (size_t i = 0; i < messages.size(); ++i) {
+    // 最新用户输入不封装
+    for (size_t i = 0; i < messages.size()-1; ++i) {
+        if(i%2){
+            continue; //不放AI回答
+        }
         json msg;
-        msg["role"] = (i % 2 == 0 ? "user" : "assistant");
+        msg["role"] = "user";
         msg["content"] = messages[i].first;
         msgArray.push_back(msg);
     }
+
+    payload["input"]["prompt"] = messages[messages.size()-1];
     payload["input"]["messages"] = msgArray;
     payload["parameters"] = json::object(); 
+
+    // 新版改版，似乎没法自己维护上下文，阿里智能体
     /**
      * {
         "input": {
@@ -160,17 +169,21 @@ json AliyunMcpStrategy::buildRequest(const std::vector<std::pair<std::string, lo
     payload["model"] = getModel();
     json msgArray = json::array();
 
-    for (size_t i = 0; i < messages.size(); ++i) {
-        json msg;
-        if (i % 2 == 0) {
-            msg["role"] = "user";
-        }
-        else {
-            msg["role"] = "assistant";
-        }
-        msg["content"] = messages[i].first;
-        msgArray.push_back(msg);
-    }
+    // for (size_t i = 0; i < messages.size(); ++i) {
+    //     json msg;
+    //     if (i % 2 == 0) {
+    //         msg["role"] = "user";
+    //     }
+    //     else {
+    //         msg["role"] = "assistant";
+    //     }
+    //     msg["content"] = messages[i].first;
+    //     msgArray.push_back(msg);
+    // }
+    json msg;
+    msg["role"] = "user";
+    msg["content"] = messages[messages.size()-1].first;
+    msgArray.push_back(msg);
     payload["messages"] = msgArray;
     return payload;
 }
