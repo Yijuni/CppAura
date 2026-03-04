@@ -7,7 +7,7 @@
 
 ---
 
-## 🗂️ 仓库结构
+##  仓库结构
 
 ```
 CMakeLists.txt            # 构建配置
@@ -39,7 +39,7 @@ README.md                 # 本文件
 
 ---
 
-## ⚙️ 项目构建
+##  项目构建
 
 本项目使用 CMake（最低版本 3.10），目标为 C++17。外部依赖包括：
 
@@ -63,7 +63,7 @@ make -j$(nproc)
 
 ---
 
-## 🚀 运行服务器
+## 运行服务器
 
 构建成功后，可执行文件 `my_http_server` 位于 `build` 目录中。它在配置的端口上侦听（默认在 `ChatServer/config` 或 `HttpServer` 初始化中设置），并将传入的 HTTP 请求路由到定义在 `AIService/ChatServer/src/handlers` 的相应处理程序。
 
@@ -73,7 +73,7 @@ make -j$(nproc)
 
 ---
 
-## 🧩 扩展代码库
+##  扩展代码库
 
 * **添加新路由**：实现一个继承自通用基类的处理程序（参见现有处理程序），并在 `main.cpp` 中将其注册到路由器。
 * **AI 实用工具**：`AIService/ChatServer/include/AIUtil` 下的类遵循策略/工厂模式。可以通过扩展 `AIToolRegistry` 并实现相应策略来添加新工具。
@@ -81,7 +81,7 @@ make -j$(nproc)
 
 ---
 
-## 📦 依赖与说明
+##  依赖与说明
 
 此仓库拟在 Linux 上编译。`CMakeLists.txt` 包含硬编码的包含/链接目录；请根据环境调整。
 
@@ -95,10 +95,3 @@ OpenSSL 和 CURL 通过 `find_package` 查找。
 
 ---
 
-## 📄 许可证
-
-请在此处填写许可证（例如 MIT、Apache 2.0）。
-
----
-
-> 由 HTTP 框架和 AI 后端处理程序的作者编写。欢迎 fork、修改或集成到您自己的项目中。
